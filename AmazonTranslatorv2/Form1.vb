@@ -29,6 +29,7 @@ Public Class Form1
     Dim thread As New Thread(AddressOf mainFunction)
 
 
+
     ' Starts the main function, after the gui is shown
     Private Sub Form1_Load(sender As Object, e As EventArgs) Handles MyBase.Shown
 
@@ -89,9 +90,8 @@ Public Class Form1
 
                 writeLog("R", "Sucessfully read report.", text_file_path, 300)
 
+                FileClose()
 
-
-                restartProgram()
             End While
         End While
     End Sub
@@ -156,7 +156,7 @@ Public Class Form1
 
         Try
             dirs = Directory.GetFiles(srcDirectory, orderName)
-            text_file_path = dirs(0)
+            text_file_path = dirs(dirs.Length - 1)
         Catch ex As Exception
             writeLog("W", "No reports left.", "", 600)
             Return True
@@ -261,6 +261,8 @@ Public Class Form1
 
         data.Dispose()
         data.Close()
+        tfp.Dispose()
+        tfp.Close()
     End Function
 
 
@@ -311,13 +313,8 @@ Public Class Form1
         End Try
 
         Threading.Thread.Sleep(waittime * 1000)
+
     End Function
-
-
-    Private Function restartProgram()
-        Application.Restart()
-    End Function
-
 
 
     Private Sub openReports_Click(sender As Object, e As EventArgs) Handles openReports.Click
