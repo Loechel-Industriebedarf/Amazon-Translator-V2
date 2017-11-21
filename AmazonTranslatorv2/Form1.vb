@@ -20,6 +20,7 @@ Public Class Form1
     Dim file_old As String = ""
     Dim file_data As String
     Dim file_text As String = ""
+    Dim lastFile As String = ""
 
     Dim file_dest As String = destDirectory + filename
 
@@ -32,7 +33,12 @@ Public Class Form1
     Private Sub Form1_Load(sender As Object, e As EventArgs) Handles MyBase.Shown
 
         ' The tread does all the important stuff.
-        thread.Start()
+        Try
+            thread.Start()
+        Catch ex As Exception
+
+        End Try
+
 
     End Sub
 
@@ -42,11 +48,11 @@ Public Class Form1
 
         While (True)
             While (True)
-                writeLog("S", "PROCESS STARTED", "", "")
+                writeLog("S", "PROCESS STARTED", "", 0)
 
 
                 ' What's the latest report that got written to the system?
-                Dim lastFile As String = My.Computer.FileSystem.ReadAllText(lastFilePath)
+                lastFile = My.Computer.FileSystem.ReadAllText(lastFilePath)
 
                 ' Read latest amazon report
                 Dim dirs As String() = Directory.GetFiles(srcDirectory, orderName)
@@ -63,7 +69,7 @@ Public Class Form1
                     Exit While
                 End If
 
-                If (moveOldFiles(lastFile)) Then
+                If (moveOldFiles()) Then
                     Exit While
                 End If
 
@@ -81,9 +87,11 @@ Public Class Form1
 
 
 
-                writeLog("R", "Sucessfully read report", file_dest, "5")
+                writeLog("R", "Sucessfully read report.", text_file_path, 300)
 
-                Threading.Thread.Sleep(300000) ' 5 minutes
+
+
+                restartProgram()
             End While
         End While
     End Sub
@@ -94,10 +102,9 @@ Public Class Form1
             If FileLen(file_dest) <= 0 Then
                 Try
                     File.Delete(file_dest)
-                    writeLog("F", "0 kb file got deleted", "", "0")
+                    writeLog("F", "0 kb file got deleted", "", 0)
                 Catch ex As Exception
-                    writeLog("F", ex.ToString, "", "1")
-                    Threading.Thread.Sleep(60000) ' 1 minutes
+                    writeLog("F", ex.ToString, "", 60)
                 End Try
                 Return True
             End If
@@ -110,8 +117,7 @@ Public Class Form1
     Private Function fileAlreadyExists() As Boolean
 
         If File.Exists(file_dest) Then
-            writeLog("W", "File already exists.", file_dest, "5")
-            Threading.Thread.Sleep(300000) ' 5 minutes
+            writeLog("W", "File already exists.", file_dest, 300)
             Return True
         End If
 
@@ -122,22 +128,21 @@ Public Class Form1
 
     ' Moves files that got read into the system
     ' If files can't be moved, restart the loop
-    Private Function moveOldFiles(lastFile As String) As Boolean
+    Private Function moveOldFiles() As Boolean
         Dim wordArr As String() = lastFile.Split("\")
         Dim result As String = wordArr(1)
         Dim doneReportsFile As String = doneReports + wordArr(wordArr.Length - 1)
         If File.Exists(lastFile) Then
             Try
                 File.Move(lastFile, doneReportsFile)
-                writeLog("W", "File moved.", lastFile + " + " + doneReportsFile, "0")
+                writeLog("W", "File moved.", lastFile + " TO " + doneReportsFile, 0)
             Catch ex As Exception
                 Try
+                    writeLog("F", ex.ToString, lastFile + " + " + doneReportsFile, 60)
                     File.Delete(doneReportsFile)
-                    writeLog("F", ex.ToString, lastFile + " + " + doneReportsFile, "1")
                 Catch ex2 As Exception
-                    writeLog("F", ex2.ToString, lastFile + " + " + doneReportsFile, "1")
+                    writeLog("F", ex2.ToString, lastFile + " + " + doneReportsFile, 60)
                 End Try
-                Threading.Thread.Sleep(60000) ' 1 minutes
                 Return True
             End Try
         End If
@@ -153,8 +158,7 @@ Public Class Form1
             dirs = Directory.GetFiles(srcDirectory, orderName)
             text_file_path = dirs(0)
         Catch ex As Exception
-            writeLog("W", "No reports left.", "", "10")
-            Threading.Thread.Sleep(600000) ' 10 minutes
+            writeLog("W", "No reports left.", "", 600)
             Return True
         End Try
 
@@ -255,8 +259,8 @@ Public Class Form1
             old_order = file_data_array(0)
         End While
 
-        data.Close()
         data.Dispose()
+        data.Close()
     End Function
 
 
@@ -267,6 +271,7 @@ Public Class Form1
         Dim lastFileWriter As System.IO.StreamWriter
         lastFileWriter = My.Computer.FileSystem.OpenTextFileWriter(lastFilePath, False)
         lastFileWriter.Write(text_file_path.ToString)
+        lastFileWriter.Dispose()
         lastFileWriter.Close()
     End Function
 
@@ -274,7 +279,7 @@ Public Class Form1
 
 
     ' Writes logs to a text file
-    Private Function writeLog(errortype As String, message As String, file As String, waittime As String)
+    Private Function writeLog(errortype As String, message As String, file As String, waittime As Int16)
         Dim logMessage As String = ""
         If (errortype <> "") Then
             logMessage = logMessage + "[" + errortype + "]"
@@ -285,8 +290,17 @@ Public Class Form1
         If (file <> "") Then
             logMessage = logMessage + " > " + file
         End If
-        If (waittime <> "") Then
-            logMessage = logMessage + " | Waiting " + waittime + " minute/s."
+        If (waittime <> 0) Then
+            Dim waitminute As Double = waittime / 60
+            logMessage = logMessage + " | Waiting " + waitminute.ToString + " minute"
+            Try
+                If (waitminute > 1) Then
+                    logMessage = logMessage + "s"
+                End If
+            Catch ex As Exception
+                logMessage = logMessage + "s"
+            End Try
+            logMessage = logMessage + "."
         End If
 
 
@@ -295,8 +309,14 @@ Public Class Form1
         Catch ex As Exception
 
         End Try
+
+        Threading.Thread.Sleep(waittime * 1000)
     End Function
 
+
+    Private Function restartProgram()
+        Application.Restart()
+    End Function
 
 
 
