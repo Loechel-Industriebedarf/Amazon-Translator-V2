@@ -28,6 +28,8 @@ Partial Class Form1
         Me.openDoneReports = New System.Windows.Forms.Button()
         Me.openLogFolder = New System.Windows.Forms.Button()
         Me.openDebug = New System.Windows.Forms.Button()
+        Me.openAMTU = New System.Windows.Forms.Button()
+        Me.killProgram = New System.Windows.Forms.Button()
         Me.SuspendLayout()
         '
         'openReports
@@ -84,11 +86,31 @@ Partial Class Form1
         Me.openDebug.Text = "Debug"
         Me.openDebug.UseVisualStyleBackColor = True
         '
+        'openAMTU
+        '
+        Me.openAMTU.Location = New System.Drawing.Point(12, 99)
+        Me.openAMTU.Name = "openAMTU"
+        Me.openAMTU.Size = New System.Drawing.Size(201, 23)
+        Me.openAMTU.TabIndex = 6
+        Me.openAMTU.Text = "AMTU"
+        Me.openAMTU.UseVisualStyleBackColor = True
+        '
+        'killProgram
+        '
+        Me.killProgram.Location = New System.Drawing.Point(12, 153)
+        Me.killProgram.Name = "killProgram"
+        Me.killProgram.Size = New System.Drawing.Size(201, 23)
+        Me.killProgram.TabIndex = 7
+        Me.killProgram.Text = "KILL"
+        Me.killProgram.UseVisualStyleBackColor = True
+        '
         'Form1
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.ClientSize = New System.Drawing.Size(225, 107)
+        Me.ClientSize = New System.Drawing.Size(225, 188)
+        Me.Controls.Add(Me.killProgram)
+        Me.Controls.Add(Me.openAMTU)
         Me.Controls.Add(Me.openDebug)
         Me.Controls.Add(Me.openLogFolder)
         Me.Controls.Add(Me.openDoneReports)
@@ -108,4 +130,6 @@ Partial Class Form1
     Friend WithEvents openDoneReports As Button
     Friend WithEvents openLogFolder As Button
     Friend WithEvents openDebug As Button
+    Friend WithEvents openAMTU As Button
+    Friend WithEvents killProgram As Button
 End Class
