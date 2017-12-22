@@ -26,6 +26,9 @@ Public Class Form1
 
     Dim fileExists As Boolean = False
 
+    Dim shippingCosts As Double = 4.9
+    Dim amazonFeeAmount As Double = 0.12
+
     Dim thread As New Thread(AddressOf mainFunction)
 
 
@@ -175,6 +178,8 @@ Public Class Form1
         tfp.TextFieldType = FieldType.Delimited
 
         Dim old_order As String = ""
+        Dim new_price As Double = 0
+        Dim amazonFeePrice As Double
         tfp.ReadLine() 'Skips header
         While tfp.EndOfData = False
             file_data = tfp.ReadLine()
@@ -183,13 +188,13 @@ Public Class Form1
             Dim file_data_array As String() = file_data.Split(New Char() {";"c})
 
             file_data = ""
-            For value As Integer = 0 To file_data_array.Length - 1
+            For value As Integer = 0 To file_data_array.Length
                 ' Changes Parameters to shipping parameters
                 Select Case value
                     Case 11
                         ' Fix for prices
                         ' Current price divided by number of articles
-                        Dim new_price As Double = Convert.ToDouble(file_data_array(value)) / 100 / Convert.ToDouble(file_data_array(9))
+                        new_price = Convert.ToDouble(file_data_array(value)) / 100 / Convert.ToDouble(file_data_array(9))
                         Dim new_price_string As String = Replace(new_price.ToString, ",", ".")   ' We need a . for decimals
                         file_data = file_data + new_price_string + ";"
                     Case 17
@@ -202,7 +207,7 @@ Public Class Form1
                             file_data = file_data + file_data_array(value) + ";" + file_data_array(value - 1) + ";"
                         End If
                     Case 25
-                                    ' Do Stuff for 17 in step 18
+                                    ' Do Stuff for 25 in step 26
                     Case 26
                         ' User is private, not business
                         If file_data_array(value).Length = 0 Then
@@ -210,12 +215,15 @@ Public Class Form1
                         Else
                             file_data = file_data + file_data_array(value) + ";" + file_data_array(value - 1) + ";"
                         End If
+                    Case file_data_array.Length
+                        amazonFeePrice = (new_price * Convert.ToDouble(file_data_array(9)) + shippingCosts) * amazonFeeAmount
+                        file_data = file_data + Replace(amazonFeePrice.ToString, ",", ".")
                     Case Else
                         file_data = file_data + file_data_array(value) + ";"
                 End Select
             Next
 
-            Data.WriteLine(file_data)
+            data.WriteLine(file_data)
             ' Shipping shouldn't be calculated two times
             If String.Compare(old_order, file_data_array(0)) Then
                 Dim shipping As String = ""
@@ -229,7 +237,7 @@ Public Class Form1
                         Case 9
                             shipping = shipping + "1" + ";"                     ' Numbers of shippings
                         Case 11
-                            shipping = shipping + "4.9" + ";"                   ' Shipping cost
+                            shipping = shipping + shippingCosts.ToString + ";"                   ' Shipping cost
                         Case 17
                                     ' Do Stuff for 17 in step 18
                         Case 18
@@ -253,7 +261,7 @@ Public Class Form1
                     End Select
                 Next
                 ' Write shipping to file
-                Data.WriteLine(shipping)
+                data.WriteLine(shipping)
             End If
 
             old_order = file_data_array(0)
