@@ -119,7 +119,7 @@ Partial Class Form1
         Me.Controls.Add(Me.openReports)
         Me.Cursor = System.Windows.Forms.Cursors.Default
         Me.Name = "Form1"
-        Me.Text = "AmazonTranslator 2.1"
+        Me.Text = "AmazonTranslator 2.2"
         Me.ResumeLayout(False)
 
     End Sub
