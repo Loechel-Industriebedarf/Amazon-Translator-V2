@@ -237,7 +237,7 @@ Public Class Form1
                         Case 9
                             shipping = shipping + "1" + ";"                     ' Numbers of shippings
                         Case 11
-                            shipping = shipping + shippingCosts.ToString + ";"                   ' Shipping cost
+                            shipping = shipping + Replace(shippingCosts.ToString, ",", ".") + ";"  ' Shipping cost
                         Case 17
                                     ' Do Stuff for 17 in step 18
                         Case 18
