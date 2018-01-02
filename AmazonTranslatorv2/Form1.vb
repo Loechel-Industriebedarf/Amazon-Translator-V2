@@ -26,7 +26,7 @@ Public Class Form1
 
     Dim fileExists As Boolean = False
 
-    Dim shippingCosts As Double = 4.9
+    Dim shippingCosts As String = "5.9"
     Dim amazonFeeAmount As Double = 0.12
 
     Dim thread As New Thread(AddressOf mainFunction)
@@ -197,6 +197,10 @@ Public Class Form1
                         new_price = Convert.ToDouble(file_data_array(value)) / 100 / Convert.ToDouble(file_data_array(9))
                         Dim new_price_string As String = Replace(new_price.ToString, ",", ".")   ' We need a . for decimals
                         file_data = file_data + new_price_string + ";"
+                    Case 13
+                        shippingCosts = file_data_array(13)
+                        file_data = file_data + file_data_array(value) + ";"
+                        Console.WriteLine(shippingCosts)
                     Case 17
                                     ' Do Stuff for 17 in step 18
                     Case 18
