@@ -27,7 +27,7 @@ Public Class Form1
     Dim fileExists As Boolean = False
 
     Dim shippingCosts As String = "5.9"
-    Dim amazonFeeAmount As Double = 0.12
+    Dim amazonFeeAmount As Double = 0.15
 
     Dim thread As New Thread(AddressOf mainFunction)
 
@@ -178,7 +178,8 @@ Public Class Form1
         tfp.TextFieldType = FieldType.Delimited
 
         Dim old_order As String = ""
-        Dim new_price As Double = 0
+        Dim new_price As Double = 0 ' Price of one article
+        Dim num_of_articles As Double = 1   ' Number of articles ordered
         Dim amazonFeePrice As Double
         tfp.ReadLine() 'Skips header
         While tfp.EndOfData = False
@@ -194,13 +195,13 @@ Public Class Form1
                     Case 11
                         ' Fix for prices
                         ' Current price divided by number of articles
-                        new_price = Convert.ToDouble(file_data_array(value)) / 100 / Convert.ToDouble(file_data_array(9))
+                        num_of_articles = Convert.ToDouble(file_data_array(9))
+                        new_price = Convert.ToDouble(file_data_array(value)) / 100 / num_of_articles
                         Dim new_price_string As String = Replace(new_price.ToString, ",", ".")   ' We need a . for decimals
                         file_data = file_data + new_price_string + ";"
                     Case 13
                         shippingCosts = file_data_array(13)
                         file_data = file_data + file_data_array(value) + ";"
-                        Console.WriteLine(shippingCosts)
                     Case 17
                                     ' Do Stuff for 17 in step 18
                     Case 18
@@ -220,7 +221,7 @@ Public Class Form1
                             file_data = file_data + file_data_array(value) + ";" + file_data_array(value - 1) + ";"
                         End If
                     Case file_data_array.Length
-                        amazonFeePrice = (new_price * Convert.ToDouble(file_data_array(9)) + shippingCosts) * amazonFeeAmount
+                        amazonFeePrice = ((new_price * num_of_articles + Convert.ToDouble(shippingCosts) / 100) * amazonFeeAmount / num_of_articles) / 119 * 100
                         file_data = file_data + Replace(amazonFeePrice.ToString, ",", ".")
                     Case Else
                         file_data = file_data + file_data_array(value) + ";"
