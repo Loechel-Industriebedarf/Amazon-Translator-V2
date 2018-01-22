@@ -27,7 +27,7 @@ Public Class Form1
     Dim fileExists As Boolean = False
 
     Dim shippingCosts As String = "5.9"
-    Dim amazonFeeAmount As Double = 0.15
+    Dim amazonFeeAmount As Double = 0.12
 
     Dim thread As New Thread(AddressOf mainFunction)
 
@@ -229,10 +229,8 @@ Public Class Form1
             Next
 
             data.WriteLine(file_data)
-            ' Shipping shouldn't be calculated two times
-            If String.Compare(old_order, file_data_array(0)) Then
-                Dim shipping As String = ""
-                For value As Integer = 0 To file_data_array.Length - 1
+            Dim shipping As String = ""
+            For value As Integer = 0 To file_data_array.Length
                     ' Changes Parameters to shipping parameters
                     Select Case value
                         Case 7
@@ -261,15 +259,20 @@ Public Class Form1
                             Else
                                 shipping = shipping + file_data_array(value) + ";" + file_data_array(value - 1) + ";"
                             End If
-                        Case Else
+                        Case file_data_array.Length
+                        If (Convert.ToDouble(shippingCosts) > 3.9) Then
+                            Console.Write((Convert.ToDouble(shippingCosts) / 119 * 100).ToString)
+                            Dim shippingFeePrice As Double = ((4.99 * 1.19) - (Convert.ToDouble(shippingCosts) / 100) + 1) / 119 * 100
+                            shipping = shipping + Replace(shippingFeePrice.ToString, ",", ".")
+                        End If
+                    Case Else
                             shipping = shipping + file_data_array(value) + ";"
                     End Select
                 Next
                 ' Write shipping to file
                 data.WriteLine(shipping)
-            End If
 
-            old_order = file_data_array(0)
+                old_order = file_data_array(0)
         End While
 
         data.Dispose()
