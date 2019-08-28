@@ -2,6 +2,7 @@
 Imports System.Text
 Imports Microsoft.VisualBasic.FileIO
 Imports System.Threading
+Imports System.Text.RegularExpressions
 
 Public Class Form1
 
@@ -27,7 +28,7 @@ Public Class Form1
     Dim fileExists As Boolean = False
 
     Dim shippingCosts As String = "5.9"
-    Dim amazonFeeAmount As Double = 0.12
+    Dim amazonFeeAmount As Double = 0.15
 
     Dim thread As New Thread(AddressOf mainFunction)
 
@@ -173,7 +174,7 @@ Public Class Form1
         Dim data As System.IO.StreamWriter = My.Computer.FileSystem.OpenTextFileWriter(file_dest, False)
 
         ' Read stuff from txt file
-        Dim tfp As New TextFieldParser(text_file_path, Encoding.GetEncoding(1252))  ' Source files are in ANSI-encoding
+        Dim tfp As New TextFieldParser(text_file_path, Encoding.GetEncoding(65001))  ' Source files are in ANSI-encoding
         tfp.Delimiters = New String() {vbTab}
         tfp.TextFieldType = FieldType.Delimited
 
@@ -203,7 +204,7 @@ Public Class Form1
                         shippingCosts = file_data_array(13)
                         file_data = file_data + file_data_array(value) + ";"
                     Case 17
-                                    ' Do Stuff for 17 in step 18
+                        ' Do Stuff for 17 in step 18
                     Case 18
                         ' User is private, not business
                         If file_data_array(value).Length = 0 Then
@@ -212,13 +213,20 @@ Public Class Form1
                             file_data = file_data + file_data_array(value) + ";" + file_data_array(value - 1) + ";"
                         End If
                     Case 25
-                                    ' Do Stuff for 25 in step 26
+                        ' Do Stuff for 25 in step 26
                     Case 26
                         ' User is private, not business
-                        If file_data_array(value).Length = 0 Then
-                            file_data = file_data + file_data_array(value - 1) + ";;"
-                        Else
+                        If Regex.IsMatch(file_data_array(value), "[0-9]") Then
                             file_data = file_data + file_data_array(value) + ";" + file_data_array(value - 1) + ";"
+                        Else
+                            file_data = file_data + file_data_array(value + 1) + ";" + file_data_array(value) + ";"
+                        End If
+                    Case 27
+                        ' User is private, not business
+                        If Regex.IsMatch(file_data_array(value - 1), "[0-9]") Then
+                            file_data = file_data + file_data_array(value) + ";"
+                        Else
+                            file_data = file_data + file_data_array(value - 2) + ";"
                         End If
                     Case file_data_array.Length
                         amazonFeePrice = ((new_price * num_of_articles + Convert.ToDouble(shippingCosts) / 100) * amazonFeeAmount / num_of_articles) / 119 * 100
@@ -231,48 +239,55 @@ Public Class Form1
             data.WriteLine(file_data)
             Dim shipping As String = ""
             For value As Integer = 0 To file_data_array.Length
-                    ' Changes Parameters to shipping parameters
-                    Select Case value
-                        Case 7
-                            shipping = shipping + "VERSAND-1955_LAGER" + ";"    ' Shipping sku
-                        Case 8
-                            shipping = shipping + "Versand Amazon" + ";"        ' Shipping name
-                        Case 9
-                            shipping = shipping + "1" + ";"                     ' Numbers of shippings
-                        Case 11
-                            shipping = shipping + Replace(shippingCosts.ToString, ",", ".") + ";"  ' Shipping cost
-                        Case 17
-                                    ' Do Stuff for 17 in step 18
-                        Case 18
-                            ' User is private, not business
-                            If file_data_array(value).Length = 0 Then
-                                shipping = shipping + file_data_array(value - 1) + ";;"
-                            Else
-                                shipping = shipping + file_data_array(value) + ";" + file_data_array(value - 1) + ";"
-                            End If
-                        Case 25
-                                    ' Do Stuff for 17 in step 18
-                        Case 26
-                            ' User is private, not business
-                            If file_data_array(value).Length = 0 Then
-                                shipping = shipping + file_data_array(value - 1) + ";;"
-                            Else
-                                shipping = shipping + file_data_array(value) + ";" + file_data_array(value - 1) + ";"
-                            End If
-                        Case file_data_array.Length
-                        If (Convert.ToDouble(shippingCosts) > 3.9) Then
+                ' Changes Parameters to shipping parameters
+                Select Case value
+                    Case 7
+                        shipping = shipping + "VERSAND-1955_LAGER" + ";"    ' Shipping sku
+                    Case 8
+                        shipping = shipping + "Versand Amazon" + ";"        ' Shipping name
+                    Case 9
+                        shipping = shipping + "1" + ";"                     ' Numbers of shippings
+                    Case 11
+                        shipping = shipping + Replace(shippingCosts.ToString, ",", ".") + ";"  ' Shipping cost
+                    Case 17
+                        ' Do Stuff for 17 in step 18
+                    Case 18
+                        ' User is private, not business
+                        If file_data_array(value).Length = 0 Then
+                            shipping = shipping + file_data_array(value - 1) + ";;"
+                        Else
+                            shipping = shipping + file_data_array(value) + ";" + file_data_array(value - 1) + ";"
+                        End If
+                    Case 25
+                        ' Do Stuff for 17 in step 18
+                    Case 26
+                        ' User is private, not business
+                        If Regex.IsMatch(file_data_array(value), "[0-9]") Then
+                            shipping = shipping + file_data_array(value) + ";" + file_data_array(value - 1) + ";"
+                        Else
+                            shipping = shipping + file_data_array(value + 1) + ";" + file_data_array(value) + ";"
+                        End If
+                    Case 27
+                        ' User is private, not business
+                        If Regex.IsMatch(file_data_array(value - 1), "[0-9]") Then
+                            shipping = shipping + file_data_array(value) + ";"
+                        Else
+                            shipping = shipping + file_data_array(value - 2) + ";"
+                        End If
+                    Case file_data_array.Length
+                        If (Convert.ToDouble(shippingCosts) / 100 > 3.9) Then
                             Console.Write((Convert.ToDouble(shippingCosts) / 119 * 100).ToString)
                             Dim shippingFeePrice As Double = ((4.99 * 1.19) - (Convert.ToDouble(shippingCosts) / 100) + 1) / 119 * 100
                             shipping = shipping + Replace(shippingFeePrice.ToString, ",", ".")
                         End If
                     Case Else
-                            shipping = shipping + file_data_array(value) + ";"
-                    End Select
-                Next
-                ' Write shipping to file
-                data.WriteLine(shipping)
+                        shipping = shipping + file_data_array(value) + ";"
+                End Select
+            Next
+            ' Write shipping to file
+            data.WriteLine(shipping)
 
-                old_order = file_data_array(0)
+            old_order = file_data_array(0)
         End While
 
         data.Dispose()
