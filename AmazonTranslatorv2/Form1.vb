@@ -27,10 +27,10 @@ Public Class Form1
 
 	Dim fileExists As Boolean = False
 
-	Dim shippingCosts As String = "5.9"
-	Dim amazonFeeAmount As Double = 0.12
+    Dim shippingCosts As New Dictionary(Of String, Double)
+    Dim amazonFeeAmount As Double = 0.135
 
-	Dim thread As New Thread(AddressOf mainFunction)
+    Dim thread As New Thread(AddressOf mainFunction)
 
 
 
@@ -171,18 +171,43 @@ Public Class Form1
 
 	' Writes the Amazon.csv
 	Private Function doAmazonTranslation()
-		Dim data As System.IO.StreamWriter = My.Computer.FileSystem.OpenTextFileWriter(file_dest, False)
+        Dim data As System.IO.StreamWriter = My.Computer.FileSystem.OpenTextFileWriter(file_dest, False)
 
-		' Read stuff from txt file
-		Dim tfp As New TextFieldParser(text_file_path, Encoding.GetEncoding(65001))  ' Source files are in ANSI-encoding
-		tfp.Delimiters = New String() {vbTab}
-		tfp.TextFieldType = FieldType.Delimited
-
-		Dim old_order As String = ""
+        Dim old_order As String = ""
 		Dim new_price As Double = 0 ' Price of one article
 		Dim num_of_articles As Double = 1   ' Number of articles ordered
-		Dim amazonFeePrice As Double
-		tfp.ReadLine() 'Skips header
+        Dim amazonFeePrice As Double
+
+        ' Read shipping costs from file
+
+        Dim tfpShipping As New TextFieldParser(text_file_path, Encoding.GetEncoding(65001))  ' Source files are in ANSI-encoding
+        tfpShipping.Delimiters = New String() {vbTab}
+        tfpShipping.TextFieldType = FieldType.Delimited
+
+        tfpShipping.ReadLine() 'Skips header
+        While tfpShipping.EndOfData = False
+            file_data = tfpShipping.ReadLine()
+            file_data = Replace(file_data, ";", ",")
+            file_data = Replace(file_data, vbTab, ";")
+            Dim file_data_array As String() = file_data.Split(New Char() {";"c})
+
+            'If the order number already exists, add shipping costs to order
+            If shippingCosts.ContainsKey(file_data_array(0)) Then
+                shippingCosts(file_data_array(0)) = shippingCosts(file_data_array(0)) + file_data_array(13) / 100
+
+                'If the order number does not exist, add it
+            Else
+                shippingCosts.Add(file_data_array(0), file_data_array(13) / 100)
+            End If
+        End While
+
+
+        'Read actual data from file
+
+        Dim tfp As New TextFieldParser(text_file_path, Encoding.GetEncoding(65001))  ' Source files are in ANSI-encoding
+        tfp.Delimiters = New String() {vbTab}
+        tfp.TextFieldType = FieldType.Delimited
+        tfp.ReadLine() 'Skips header
 		While tfp.EndOfData = False
 			file_data = tfp.ReadLine()
 			file_data = Replace(file_data, ";", ",")
@@ -201,9 +226,8 @@ Public Class Form1
 						Dim new_price_string As String = Replace(new_price.ToString, ",", ".")   ' We need a . for decimals
 						file_data = file_data + new_price_string + ";"
 					Case 13
-						shippingCosts = file_data_array(13)
-						file_data = file_data + file_data_array(value) + ";"
-					Case 17
+                        file_data = file_data + Replace(shippingCosts(file_data_array(0)).ToString, ",", ".") + ";"
+                    Case 17
 						' Do Stuff for 17 in step 18
 					Case 18
 						' User is private, not business
@@ -230,7 +254,7 @@ Public Class Form1
                             file_data = file_data + file_data_array(value - 2) + ";"
                         End If
                     Case file_data_array.Length
-                        amazonFeePrice = ((new_price * num_of_articles + Convert.ToDouble(shippingCosts) / 100) * amazonFeeAmount / num_of_articles) / 116 * 100
+                        amazonFeePrice = ((new_price * num_of_articles + shippingCosts(file_data_array(0)) / 100) * amazonFeeAmount / num_of_articles) / 116 * 100
                         file_data = file_data + Replace(amazonFeePrice.ToString, ",", ".")
 					Case Else
 						file_data = file_data + file_data_array(value) + ";"
