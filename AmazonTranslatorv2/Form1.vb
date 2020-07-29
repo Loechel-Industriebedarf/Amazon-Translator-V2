@@ -208,6 +208,8 @@ Public Class Form1
 
         'Read actual data from file
 
+        data = My.Computer.FileSystem.OpenTextFileWriter(file_dest, False)
+
         Dim tfp As New TextFieldParser(text_file_path, Encoding.GetEncoding(65001))  ' Source files are in ANSI-encoding
         tfp.Delimiters = New String() {vbTab}
         tfp.TextFieldType = FieldType.Delimited
