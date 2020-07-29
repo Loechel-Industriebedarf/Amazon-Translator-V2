@@ -201,6 +201,10 @@ Public Class Form1
             End If
         End While
 
+        data.Dispose()
+        data.Close()
+        tfpShipping.Dispose()
+        tfpShipping.Close()
 
         'Read actual data from file
 
