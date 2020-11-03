@@ -242,22 +242,15 @@ Public Class Form1
 						Else
 							file_data = file_data + file_data_array(value) + ";" + file_data_array(value - 1) + ";"
 						End If
-					Case 25
-						' Do Stuff for 25 in step 26
-					Case 26
-						' User is private, not business
-						' Business people have their business name in the field, where private people have their street
-						If Regex.IsMatch(file_data_array(value), "[0-9]") Then
-							file_data = file_data + file_data_array(value) + ";" + file_data_array(value - 1) + ";"
-						Else
-							file_data = file_data + file_data_array(value + 1) + ";" + file_data_array(value) + ";"
-						End If
-					Case 27
+                    Case 26
+                        ' Do Stuff for 25 in step 26
+                    Case 27
                         ' User is private, not business
-                        If Regex.IsMatch(file_data_array(value - 1), "[0-9]") Then
-                            file_data = file_data + file_data_array(value) + ";"
+                        ' Business people have their business name in the field, where private people have their street
+                        If file_data_array(value).Length = 0 Then
+                            file_data = file_data + file_data_array(value - 1) + ";;"
                         Else
-                            file_data = file_data + file_data_array(value - 2) + ";"
+                            file_data = file_data + file_data_array(value) + ";" + file_data_array(value - 1) + ";"
                         End If
                     Case file_data_array.Length
                         amazonFeePrice = ((new_price * num_of_articles + shippingCosts(file_data_array(0)) / 100) * amazonFeeAmount / num_of_articles) / 116 * 100
