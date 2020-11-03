@@ -246,9 +246,9 @@ Public Class Form1
 						Else
 							file_data = file_data + file_data_array(value) + ";" + file_data_array(value - 1) + ";"
 						End If
-                    Case 25
-                        ' Do Stuff for 25 in step 26
                     Case 26
+                        ' Do Stuff for 25 in step 26
+                    Case 27
                         ' User is private, not business
                         ' Business people have their business name in the field, where private people have their street
                         If file_data_array(value).Length = 0 Then
