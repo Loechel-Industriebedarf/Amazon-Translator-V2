@@ -178,6 +178,10 @@ Public Class Form1
 		Dim num_of_articles As Double = 1   ' Number of articles ordered
         Dim amazonFeePrice As Double
 
+
+
+
+
         ' Read shipping costs from file
 
         Dim tfpShipping As New TextFieldParser(text_file_path, Encoding.GetEncoding(65001))  ' Source files are in ANSI-encoding
@@ -242,9 +246,9 @@ Public Class Form1
 						Else
 							file_data = file_data + file_data_array(value) + ";" + file_data_array(value - 1) + ";"
 						End If
-                    Case 26
+                    Case 25
                         ' Do Stuff for 25 in step 26
-                    Case 27
+                    Case 26
                         ' User is private, not business
                         ' Business people have their business name in the field, where private people have their street
                         If file_data_array(value).Length = 0 Then
